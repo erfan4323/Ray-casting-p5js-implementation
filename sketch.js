@@ -64,13 +64,13 @@ class Player {
   render() {
     fill("red");
     circle(this.x, this.y, this.radius);
-    stroke("red");
+    /* stroke("red");
     line(
       this.x,
       this.y,
       this.x + Math.cos(this.rotationAngle) * 30,
       this.y + Math.sin(this.rotationAngle) * 30
-    );
+    ); */
   }
 
   update() {
@@ -89,8 +89,18 @@ class Player {
 
 class Ray {
   constructor(rayAngle) {
-    this.rayAngle = rayAngle;    
+    this.rayAngle = normalizeAngle(rayAngle);    
+    this.wallHitX = 0;
+    this.wallHitY = 0;
+    this.distance = 0;
+
+    this.isRayFacingDown = this.rayAngle > 0 && this.rayAngle < Math.PI;
+    this.isRayFacingUP = !this.isRayFacingDown;
+    
+    this.isRayFacingRight = this.rayAngle > (Math.PI * 1.5) || this.rayAngle < (Math.PI * 0.5);
+    this.isRayFacingLeft = !this.isRayFacingRight;
   }
+  
   render() {
     stroke("rgba(0, 0, 255, 0.3)");
     line(
@@ -99,6 +109,28 @@ class Ray {
       player.x + Math.cos(this.rayAngle) * 30,
       player.y + Math.sin(this.rayAngle) * 30
       );
+  }
+
+  cast(columnId) {
+    var xIntercept, yIntercetpt;
+    var xStep, yStep;
+    
+    console.log("is ray facing right? ", this.isRayFacingRight);
+
+    ///////////////////////////////////////////
+    // HORIZANTAL RAY-GRID INTERSECTION CODE///
+    //////////////////////////////////////////
+    yIntercetpt = Math.floor(player.y / TILE_SIZE) * TILE_SIZE;
+    yIntercetpt += this.isRayFacingDown ? TILE_SIZE : 0;
+    
+    xIntercept = player.x + (yIntercetpt - player.y) / Math.tan(this.rayAngle);
+
+    yStep = TILE_SIZE;
+    yStep *= this.isRayFacingUP ? -1 : +1;
+    
+    xStep = TILE_SIZE / Math.tan(this.rayAngle);
+    xStep *= (this.isRayFacingLeft && xStep > 0) ? -1 : +1;
+    xStep *= (this.isRayFacingRight && xStep < 0) ? -1 : +1;
   }
 }
 
@@ -138,6 +170,13 @@ function keyReleased() {
   }
 }
 
+function normalizeAngle(angle) {
+  angle %= (2 * Math.PI);
+  if (angle < 0)
+    angle += (2 * Math.PI);
+  return angle;
+}
+
 function castAllRays() {
   var columsId = 0;
 
@@ -147,11 +186,11 @@ function castAllRays() {
   rays = [];
   for (var i = 0; i < 1 /* NUM_RAYS */; i++) {
     var ray = new Ray(rayAngle);
-    // ray.cast();
+    ray.cast(columsId);
     rays.push(ray);
 
     rayAngle += FOV_ANGLE / NUM_RAYS;
-    columsId ++;
+    columsId++;
   }
 }
 
