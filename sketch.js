@@ -276,7 +276,7 @@ function render3DProjectedWalls() {
 
     var wallStripHeight = (TILE_SIZE / rayDistance) * distanceProjectionPlane;
 
-    var wallAlpha = 170 / rayDistance;
+    var wallAlpha = 130 / rayDistance;
     var colorIntensity = ray.wasHitVertical ? 255 : 180;
     var wallColor = "rgba("+ colorIntensity +", "+ colorIntensity +", "+ colorIntensity +", "+ wallAlpha +")";
     const xOffset = ray.wasHitVertical
@@ -359,7 +359,7 @@ function update() {
 
 function draw() {
   update();
-  background(100);
+  background("#210F37");
   render3DProjectedWalls();
   grid.render();
   for (ray of rays) {
